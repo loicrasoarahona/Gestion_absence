@@ -1,6 +1,6 @@
 import express from "express";
 import cors from "cors";
-import { initDB } from "./config/init.js";
+import { initDB, insertInitialData } from "./config/init.js";
 import "./config/env.js";
 import { setupRelations } from "./models/setupRelations.js";
 
@@ -13,6 +13,7 @@ async function main() {
 
     await initDB();
     setupRelations();
+    await insertInitialData();
 
     app.get("/", (req, res) => {
       res.json({
