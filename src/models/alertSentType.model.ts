@@ -1,10 +1,10 @@
 import { DataTypes, Model } from "sequelize";
-import { AuthorAttributes } from "../types/interfaces.js";
+import { AlertSentTypeAttributes } from "../types/interfaces.js";
 import sequelize from "../config/database.js";
 
-export class Author extends Model<AuthorAttributes> {}
+export class AlertSentType extends Model<AlertSentTypeAttributes> {}
 
-Author.init(
+AlertSentType.init(
   {
     id: {
       type: DataTypes.INTEGER,
@@ -18,5 +18,5 @@ Author.init(
       field: "name",
     },
   },
-  { sequelize, tableName: "author", modelName: "Author" },
+  { sequelize, tableName: "alert_sent_type", modelName: "AlertSentType" },
 );

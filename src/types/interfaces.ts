@@ -1,11 +1,33 @@
-export interface BookAttributes {
+export interface AbsenceAttributes {
   id?: number;
-  name?: string;
-  authorId?: number;
+  absenceDate: Date;
+  studentId: number;
+  studentName: string;
+  studentClass: string;
+  returns?: AbsenceReturnAttributes[];
+  alerts?: AlertSentAttributes[];
 }
 
-export interface AuthorAttributes {
+export interface AbsenceReturnAttributes {
   id?: number;
-  name?: string;
-  books?: BookAttributes[];
+  absenceId: number;
+  returnDate: Date;
+  reason: string;
+  absence?: AbsenceAttributes;
+}
+
+export interface AlertSentTypeAttributes {
+  id?: number;
+  name: string;
+  alerts?: AlertSentAttributes[];
+}
+
+export interface AlertSentAttributes {
+  id?: number;
+  absenceId: number;
+  alertSentTypeId: number;
+  alertSentAt: Date;
+  contactDetails: string;
+  absence?: AbsenceAttributes;
+  alertSentType?: AlertSentTypeAttributes;
 }

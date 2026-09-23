@@ -1,9 +1,8 @@
 import express from "express";
 import cors from "cors";
-import { initDB, insertInitialData } from "./config/init.js";
+import { initDB } from "./config/init.js";
 import "./config/env.js";
 import { setupRelations } from "./models/setupRelations.js";
-import BookRoute from "./routes/author.route.js";
 
 async function main() {
   try {
@@ -14,7 +13,6 @@ async function main() {
 
     await initDB();
     setupRelations();
-    insertInitialData();
 
     app.get("/", (req, res) => {
       res.json({
@@ -25,8 +23,6 @@ async function main() {
     app.get("/hello", (req, res) => {
       res.send("Hello, world !!");
     });
-
-    app.use("/books", BookRoute);
 
     app.listen(PORT, () => {
       console.log(`Server running on port ${PORT}`);
