@@ -1,8 +1,10 @@
 import express from "express";
-import { createAbsence } from "../controllers/absence.controller.js";
+import { AbsenceController } from "../controllers/absence.controller.js";
 
 const router = express.Router();
 
-router.post("/", createAbsence);
+router.post("/", AbsenceController.createAbsence);
+
+router.post("/:id/send-alert", AbsenceController.sendAlert);
 
 export default router;

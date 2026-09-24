@@ -1,10 +1,12 @@
-import express from "express";
+import express, { NextFunction, Request, Response } from "express";
 import cors from "cors";
 import { initDB, insertInitialData } from "./config/init.js";
 import "./config/env.js";
 import { setupRelations } from "./models/setupRelations.js";
 import StudentRoute from "./routes/student.route.js";
 import AbsenceRoute from "./routes/absence.route.js";
+import { UndefinedQueryParameterError } from "./util/request-param.util.js";
+import { EntityNotFoundError } from "./error/entity-not-found.error.js";
 
 async function main() {
   try {
@@ -29,6 +31,18 @@ async function main() {
 
     app.use("/students", StudentRoute);
     app.use("/absences", AbsenceRoute);
+
+    // gestion d'erreurs http
+    app.use((err: unknown, req: Request, res: Response, next: NextFunction) => {
+      console.error(err);
+      if (err instanceof UndefinedQueryParameterError) {
+        return res.status(400).json({ error: err.message });
+      }
+      if (err instanceof EntityNotFoundError) {
+        return res.status(404).json({ error: err.message });
+      }
+      return res.status(500).json({ error: "Une erreur s'est produite" });
+    });
 
     app.listen(PORT, () => {
       console.log(`Server running on port ${PORT}`);
