@@ -6,6 +6,7 @@ import { fileURLToPath } from "url";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const LOGO_PATH = path.resolve(__dirname, "../../../public/ptitpre.png");
 const LOGO_CID = "ptitpre-logo";
+const SCHOOL_PHONE_NUMBER = process.env.SCHOOL_PHONE_NUMBER;
 
 export class MailServiceImpl implements MailService {
   public async sendMail(
@@ -29,7 +30,8 @@ export class MailServiceImpl implements MailService {
             <img src="cid:${LOGO_CID}" alt="Au P'tit Pré" width="70" />
           </td>
           <td style="border-left: 2px solid #ccc; padding-left: 12px;">
-            <strong>Au P'tit Pré</strong>
+            <strong>Au P'tit Pré</strong><br/>
+            ${SCHOOL_PHONE_NUMBER}
           </td>
         </tr>
       </table>

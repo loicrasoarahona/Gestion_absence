@@ -23,12 +23,17 @@ export interface AlertSentTypeAttributes {
   alerts?: AlertSentAttributes[];
 }
 
+export type AlertSentStatus = "success" | "failed";
+
 export interface AlertSentAttributes {
   id?: number;
   absenceId: number;
   alertSentTypeId: number;
   alertSentAt: Date;
   contactDetails: string;
+  message: string;
+  status: AlertSentStatus;
+  errorMessage?: string | null;
   absence?: AbsenceAttributes;
   alertSentType?: AlertSentTypeAttributes;
 }

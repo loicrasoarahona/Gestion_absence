@@ -4,8 +4,13 @@ import { AlertSent } from "../../models/alertSent.model.js";
 import { AlertSentType } from "../../models/alertSentType.model.js";
 import { AbsenceRepository } from "../../repositories/absence.repository.js";
 import { StudentDto } from "../../types/dto.js";
-import { AlertSentAttributes } from "../../types/interfaces.js";
+import {
+  AlertSentAttributes,
+  AlertSentStatus,
+} from "../../types/interfaces.js";
 import { AbsenceService } from "../absence.service.js";
+
+const SCHOOL_PHONE_NUMBER = process.env.SCHOOL_PHONE_NUMBER;
 
 export class AbsenceServiceImpl implements AbsenceService {
   public async sendAlertByEmail(
@@ -34,21 +39,39 @@ export class AbsenceServiceImpl implements AbsenceService {
         <strong>${formattedDate}</strong>.
       </p>
       <p>Merci de bien vouloir justifier cette absence auprès de l'établissement.</p>
+      <p>Pour toute question, contactez-nous au ${SCHOOL_PHONE_NUMBER}.</p>
     `;
-    await serviceLocatorCore.mailService.sendMail(email, subject, contentHtml);
-
     const alertSentType = await AlertSentType.findOne({
       where: { name: "email" },
     });
     if (!alertSentType)
       throw new EntityNotFoundError(`AlertSentType "email" not found`);
 
+    let status: AlertSentStatus = "success";
+    let errorMessage: string | null = null;
+    try {
+      await serviceLocatorCore.mailService.sendMail(
+        email,
+        subject,
+        contentHtml,
+      );
+    } catch (error) {
+      status = "failed";
+      errorMessage = error instanceof Error ? error.message : String(error);
+    }
+
     const alertSent = await AlertSent.create({
       absenceId,
       alertSentTypeId: alertSentType.dataValues.id!,
       alertSentAt: new Date(),
       contactDetails: email,
+      message: contentHtml,
+      status,
+      errorMessage,
     });
+
+    if (status === "failed")
+      throw new Error(`Échec de l'envoi de l'alerte email: ${errorMessage}`);
 
     return alertSent.dataValues;
   }
@@ -68,9 +91,7 @@ export class AbsenceServiceImpl implements AbsenceService {
       "fr-FR",
       { weekday: "long", year: "numeric", month: "long", day: "numeric" },
     );
-    const content = `Au P'tit Pré: ${absence.studentName} ${absence.studentSurname} (classe ${absence.studentClass}) a ete signale(e) absent(e) le ${formattedDate}. Merci de justifier cette absence.`;
-
-    await serviceLocatorCore.smsService.sendSms(phone, content);
+    const content = `Au P'tit Pré: ${absence.studentName} ${absence.studentSurname} (classe ${absence.studentClass}) a ete signale(e) absent(e) le ${formattedDate}. Merci de justifier cette absence. Contact: ${SCHOOL_PHONE_NUMBER}`;
 
     const alertSentType = await AlertSentType.findOne({
       where: { name: "phone" },
@@ -78,12 +99,27 @@ export class AbsenceServiceImpl implements AbsenceService {
     if (!alertSentType)
       throw new EntityNotFoundError(`AlertSentType "phone" not found`);
 
+    let status: AlertSentStatus = "success";
+    let errorMessage: string | null = null;
+    try {
+      await serviceLocatorCore.smsService.sendSms(phone, content);
+    } catch (error) {
+      status = "failed";
+      errorMessage = error instanceof Error ? error.message : String(error);
+    }
+
     const alertSent = await AlertSent.create({
       absenceId,
       alertSentTypeId: alertSentType.dataValues.id!,
       alertSentAt: new Date(),
       contactDetails: phone,
+      message: content,
+      status,
+      errorMessage,
     });
+
+    if (status === "failed")
+      throw new Error(`Échec de l'envoi de l'alerte SMS: ${errorMessage}`);
 
     return alertSent.dataValues;
   }

@@ -42,6 +42,21 @@ AlertSent.init(
       allowNull: false,
       field: "contact_details",
     },
+    message: {
+      type: DataTypes.TEXT,
+      allowNull: false,
+      field: "message",
+    },
+    status: {
+      type: DataTypes.ENUM("success", "failed"),
+      allowNull: false,
+      field: "status",
+    },
+    errorMessage: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+      field: "error_message",
+    },
   },
   { sequelize, tableName: "alert_sent", modelName: "AlertSent" },
 );
