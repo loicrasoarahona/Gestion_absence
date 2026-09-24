@@ -34,7 +34,7 @@ RUN npm ci --omit=dev
 COPY --from=builder /app/dist ./dist
 
 # Port utilisé par Express
-EXPOSE 3000
+EXPOSE 3005
 
 # Lancer l'application
 CMD ["node", "dist/app.js"]
