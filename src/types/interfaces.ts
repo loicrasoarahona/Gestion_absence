@@ -5,6 +5,9 @@ export interface AbsenceAttributes {
   studentName: string;
   studentSurname: string;
   studentClass: string;
+  reasonStdId?: number | null;
+  reasonDetail?: string | null;
+  reasonStd?: AbsenceReasonStdAttributes;
   absenceReturnId?: number | null;
   return?: AbsenceReturnAttributes;
   alerts?: AlertSentAttributes[];
@@ -12,9 +15,16 @@ export interface AbsenceAttributes {
 
 export interface AbsenceReturnAttributes {
   id?: number;
+  absenceId: number;
   returnDate: Date;
-  reason: string;
   absence?: AbsenceAttributes;
+}
+
+export interface AbsenceReasonStdAttributes {
+  id?: number;
+  name: string;
+  description?: string | null;
+  absences?: AbsenceAttributes[];
 }
 
 export interface AlertSentTypeAttributes {

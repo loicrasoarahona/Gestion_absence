@@ -26,6 +26,8 @@ export class AbsenceController {
       studentName,
       studentSurname,
       studentClass,
+      reasonStdId,
+      reasonDetail,
     } = req.body as createAbsenceDto;
 
     if (!studentId || !studentName || !studentSurname || !studentClass) {
@@ -40,6 +42,8 @@ export class AbsenceController {
         studentName,
         studentSurname,
         studentClass,
+        reasonStdId,
+        reasonDetail,
       });
 
       res.status(201).json(absence);
@@ -51,12 +55,7 @@ export class AbsenceController {
 
   public static async createAbsenceReturn(req: Request, res: Response) {
     const id = parseInt(req.params.id.toString());
-    const { returnDate, reason } = req.body as createAbsenceReturnDto;
-
-    if (!reason) {
-      res.status(400).json({ message: "Champs requis manquants" });
-      return;
-    }
+    const { returnDate } = req.body as createAbsenceReturnDto;
 
     try {
       const absence = await AbsenceRepository.findById(id);
@@ -64,14 +63,18 @@ export class AbsenceController {
         res.status(404).json({ message: "Absence non trouvée" });
         return;
       }
-      if (absence.absenceReturnId) {
+
+      const existingReturn = await AbsenceReturn.findOne({
+        where: { absenceId: id },
+      });
+      if (existingReturn) {
         res.status(409).json({ message: "Cette absence a déjà un retour" });
         return;
       }
 
       const absenceReturn = await AbsenceReturn.create({
+        absenceId: id,
         returnDate: returnDate ? new Date(returnDate) : new Date(),
-        reason,
       });
 
       await Absence.update(

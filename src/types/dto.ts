@@ -21,9 +21,10 @@ export class createAbsenceDto {
   studentName!: string;
   studentSurname!: string;
   studentClass!: string;
+  reasonStdId?: number;
+  reasonDetail?: string;
 }
 
 export class createAbsenceReturnDto {
   returnDate?: Date;
-  reason!: string;
 }
