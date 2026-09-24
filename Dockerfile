@@ -33,6 +33,13 @@ RUN npm ci --omit=dev
 # Copier le code compilé
 COPY --from=builder /app/dist ./dist
 
+# Assets statiques lus au runtime (ex. logo inséré dans les emails)
+COPY --from=builder /app/public ./public
+
+# Ne pas exécuter le processus en root
+RUN chown -R node:node /app
+USER node
+
 # Port utilisé par Express
 EXPOSE 3005
 
