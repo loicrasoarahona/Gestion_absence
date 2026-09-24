@@ -10,8 +10,14 @@ export function setupRelations() {
 }
 
 function AbsenceToAbsenceReturnRelation() {
-  Absence.hasMany(AbsenceReturn, { foreignKey: "absenceId", as: "returns" });
-  AbsenceReturn.belongsTo(Absence, { foreignKey: "absenceId", as: "absence" });
+  Absence.belongsTo(AbsenceReturn, {
+    foreignKey: "absenceReturnId",
+    as: "return",
+  });
+  AbsenceReturn.hasOne(Absence, {
+    foreignKey: "absenceReturnId",
+    as: "absence",
+  });
 }
 
 function AbsenceToAlertSentRelation() {

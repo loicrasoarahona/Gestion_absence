@@ -5,13 +5,13 @@ export interface AbsenceAttributes {
   studentName: string;
   studentSurname: string;
   studentClass: string;
-  returns?: AbsenceReturnAttributes[];
+  absenceReturnId?: number;
+  return?: AbsenceReturnAttributes;
   alerts?: AlertSentAttributes[];
 }
 
 export interface AbsenceReturnAttributes {
   id?: number;
-  absenceId: number;
   returnDate: Date;
   reason: string;
   absence?: AbsenceAttributes;
