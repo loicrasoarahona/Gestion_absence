@@ -24,4 +24,9 @@ export class StudentClientImpl implements StudentClient {
     const result = await this.http.get(url);
     return result.data;
   }
+
+  public async findById(id: number): Promise<StudentDto> {
+    const result = await this.http.get(`/students/${id}`);
+    return result.data;
+  }
 }

@@ -5,4 +5,6 @@ export interface StudentClient {
     class_level?: number;
     name?: string;
   }): Promise<StudentDto[]>;
+
+  findById(id: number): Promise<StudentDto>;
 }
