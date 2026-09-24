@@ -1,7 +1,8 @@
 import { Request, Response } from "express";
 import { Absence } from "../models/absence.model.js";
+import { AbsenceReturn } from "../models/absenceReturn.model.js";
 import { AbsenceRepository } from "../repositories/absence.repository.js";
-import { createAbsenceDto } from "../types/dto.js";
+import { createAbsenceDto, createAbsenceReturnDto } from "../types/dto.js";
 import { retrieveQueryParameter } from "../util/request-param.util.js";
 import serviceLocatorCore from "../core/service-locator.core.js";
 
@@ -45,6 +46,45 @@ export class AbsenceController {
     } catch (error) {
       console.error(error);
       res.status(500).json({ message: "Impossible de créer l'absence" });
+    }
+  }
+
+  public static async createAbsenceReturn(req: Request, res: Response) {
+    const id = parseInt(req.params.id.toString());
+    const { returnDate, reason } = req.body as createAbsenceReturnDto;
+
+    if (!reason) {
+      res.status(400).json({ message: "Champs requis manquants" });
+      return;
+    }
+
+    try {
+      const absence = await AbsenceRepository.findById(id);
+      if (!absence) {
+        res.status(404).json({ message: "Absence non trouvée" });
+        return;
+      }
+      if (absence.absenceReturnId) {
+        res.status(409).json({ message: "Cette absence a déjà un retour" });
+        return;
+      }
+
+      const absenceReturn = await AbsenceReturn.create({
+        returnDate: returnDate ? new Date(returnDate) : new Date(),
+        reason,
+      });
+
+      await Absence.update(
+        { absenceReturnId: absenceReturn.dataValues.id },
+        { where: { id } },
+      );
+
+      res.status(201).json(absenceReturn);
+    } catch (error) {
+      console.error(error);
+      res
+        .status(500)
+        .json({ message: "Impossible de créer le retour d'absence" });
     }
   }
 

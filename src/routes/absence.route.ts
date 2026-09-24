@@ -9,4 +9,6 @@ router.post("/", AbsenceController.createAbsence);
 
 router.post("/:id/send-alert", AbsenceController.sendAlert);
 
+router.post("/:id/return", AbsenceController.createAbsenceReturn);
+
 export default router;
