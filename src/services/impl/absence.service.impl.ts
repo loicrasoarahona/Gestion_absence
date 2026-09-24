@@ -4,10 +4,13 @@ import { AlertSent } from "../../models/alertSent.model.js";
 import { AlertSentType } from "../../models/alertSentType.model.js";
 import { AbsenceRepository } from "../../repositories/absence.repository.js";
 import { StudentDto } from "../../types/dto.js";
+import { AlertSentAttributes } from "../../types/interfaces.js";
 import { AbsenceService } from "../absence.service.js";
 
 export class AbsenceServiceImpl implements AbsenceService {
-  public async sendAlertByEmail(absenceId: number): Promise<void> {
+  public async sendAlertByEmail(
+    absenceId: number,
+  ): Promise<AlertSentAttributes> {
     const absence = await AbsenceRepository.findById(absenceId);
     if (!absence)
       throw new EntityNotFoundError(`Absence ${absenceId} not found`);
@@ -40,13 +43,48 @@ export class AbsenceServiceImpl implements AbsenceService {
     if (!alertSentType)
       throw new EntityNotFoundError(`AlertSentType "email" not found`);
 
-    await AlertSent.create({
+    const alertSent = await AlertSent.create({
       absenceId,
       alertSentTypeId: alertSentType.dataValues.id!,
       alertSentAt: new Date(),
       contactDetails: email,
     });
+
+    return alertSent.dataValues;
   }
 
-  public async sendAlertByPhone(absenceId: number): Promise<void> {}
+  public async sendAlertByPhone(
+    absenceId: number,
+  ): Promise<AlertSentAttributes> {
+    const absence = await AbsenceRepository.findById(absenceId);
+    if (!absence)
+      throw new EntityNotFoundError(`Absence ${absenceId} not found`);
+    const studentId = absence.studentId;
+    const student: StudentDto =
+      await serviceLocatorCore.studentClient.findById(studentId);
+    const phone = student.parents?.[0].phone;
+    if (!phone) throw "undefined parent phone";
+    const formattedDate = new Date(absence.absenceDate).toLocaleDateString(
+      "fr-FR",
+      { weekday: "long", year: "numeric", month: "long", day: "numeric" },
+    );
+    const content = `Au P'tit Pré: ${absence.studentName} ${absence.studentSurname} (classe ${absence.studentClass}) a ete signale(e) absent(e) le ${formattedDate}. Merci de justifier cette absence.`;
+
+    await serviceLocatorCore.smsService.sendSms(phone, content);
+
+    const alertSentType = await AlertSentType.findOne({
+      where: { name: "phone" },
+    });
+    if (!alertSentType)
+      throw new EntityNotFoundError(`AlertSentType "phone" not found`);
+
+    const alertSent = await AlertSent.create({
+      absenceId,
+      alertSentTypeId: alertSentType.dataValues.id!,
+      alertSentAt: new Date(),
+      contactDetails: phone,
+    });
+
+    return alertSent.dataValues;
+  }
 }

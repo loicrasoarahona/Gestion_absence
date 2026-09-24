@@ -92,11 +92,14 @@ export class AbsenceController {
     const alertType = retrieveQueryParameter(req, "alertType", "string");
     const id = req.params.id.toString();
     if (alertType == "email") {
-      await serviceLocatorCore.absenceService.sendAlertByEmail(parseInt(id));
-      return res.json("ok");
+      const alertSent =
+        await serviceLocatorCore.absenceService.sendAlertByEmail(parseInt(id));
+      return res.status(201).json(alertSent);
     }
     if (alertType == "phone") {
-      // gestion par phone
+      const alertSent =
+        await serviceLocatorCore.absenceService.sendAlertByPhone(parseInt(id));
+      return res.status(201).json(alertSent);
     } else {
       throw "alert type not found";
     }
