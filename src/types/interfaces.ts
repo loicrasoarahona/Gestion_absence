@@ -5,7 +5,7 @@ export interface AbsenceAttributes {
   studentName: string;
   studentSurname: string;
   studentClass: string;
-  absenceReturnId?: number;
+  absenceReturnId?: number | null;
   return?: AbsenceReturnAttributes;
   alerts?: AlertSentAttributes[];
 }

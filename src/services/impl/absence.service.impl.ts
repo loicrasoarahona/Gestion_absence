@@ -1,5 +1,7 @@
 import serviceLocatorCore from "../../core/service-locator.core.js";
 import { EntityNotFoundError } from "../../error/entity-not-found.error.js";
+import { AlertSent } from "../../models/alertSent.model.js";
+import { AlertSentType } from "../../models/alertSentType.model.js";
 import { AbsenceRepository } from "../../repositories/absence.repository.js";
 import { StudentDto } from "../../types/dto.js";
 import { AbsenceService } from "../absence.service.js";
@@ -31,6 +33,19 @@ export class AbsenceServiceImpl implements AbsenceService {
       <p>Merci de bien vouloir justifier cette absence auprès de l'établissement.</p>
     `;
     await serviceLocatorCore.mailService.sendMail(email, subject, contentHtml);
+
+    const alertSentType = await AlertSentType.findOne({
+      where: { name: "email" },
+    });
+    if (!alertSentType)
+      throw new EntityNotFoundError(`AlertSentType "email" not found`);
+
+    await AlertSent.create({
+      absenceId,
+      alertSentTypeId: alertSentType.dataValues.id!,
+      alertSentAt: new Date(),
+      contactDetails: email,
+    });
   }
 
   public async sendAlertByPhone(absenceId: number): Promise<void> {}

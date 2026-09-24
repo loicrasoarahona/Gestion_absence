@@ -1,10 +1,23 @@
 import { Request, Response } from "express";
 import { Absence } from "../models/absence.model.js";
+import { AbsenceRepository } from "../repositories/absence.repository.js";
 import { createAbsenceDto } from "../types/dto.js";
 import { retrieveQueryParameter } from "../util/request-param.util.js";
 import serviceLocatorCore from "../core/service-locator.core.js";
 
 export class AbsenceController {
+  public static async listOngoing(req: Request, res: Response) {
+    try {
+      const absences = await AbsenceRepository.findOngoing();
+      res.json(absences);
+    } catch (error) {
+      console.error(error);
+      res
+        .status(500)
+        .json({ message: "Impossible de récupérer les absences en cours" });
+    }
+  }
+
   public static async createAbsence(req: Request, res: Response) {
     const {
       absenceDate,
