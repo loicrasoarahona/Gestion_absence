@@ -27,6 +27,11 @@ Absence.init(
       allowNull: false,
       field: "student_name",
     },
+    studentSurname: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      field: "student_surname",
+    },
     studentClass: {
       type: DataTypes.STRING,
       allowNull: false,

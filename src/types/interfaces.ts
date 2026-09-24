@@ -3,6 +3,7 @@ export interface AbsenceAttributes {
   absenceDate: Date;
   studentId: number;
   studentName: string;
+  studentSurname: string;
   studentClass: string;
   returns?: AbsenceReturnAttributes[];
   alerts?: AlertSentAttributes[];
