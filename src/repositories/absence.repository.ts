@@ -2,6 +2,7 @@ import { literal, Op } from "sequelize";
 import { Absence } from "../models/absence.model.js";
 import { AlertSent } from "../models/alertSent.model.js";
 import { AbsenceAttributes } from "../types/interfaces.js";
+import { AlertSentType } from "../models/alertSentType.model.js";
 
 export class AbsenceRepository {
   public static async findById(id: number): Promise<AbsenceAttributes | null> {
@@ -17,7 +18,17 @@ export class AbsenceRepository {
           [Op.notIn]: literal("(SELECT absence_id FROM absence_return)"),
         },
       },
-      include: { model: AlertSent, as: "alerts" },
+      include: {
+        model: AlertSent,
+        as: "alerts",
+        include: [
+          {
+            model: AlertSentType,
+            as: "alertSentType",
+          },
+        ],
+      },
+      order: [["absenceDate", "DESC"]],
     });
     return results.map((result) => result.dataValues);
   }

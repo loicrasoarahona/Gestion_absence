@@ -1,4 +1,4 @@
-import { StudentDto } from "../types/dto.js";
+import { ClassLevelDto, StudentDto } from "../types/dto.js";
 
 export interface StudentClient {
   findAllUsers(filter: {
@@ -7,4 +7,6 @@ export interface StudentClient {
   }): Promise<StudentDto[]>;
 
   findById(id: number): Promise<StudentDto>;
+
+  findAllClassLevels(): Promise<ClassLevelDto[]>;
 }

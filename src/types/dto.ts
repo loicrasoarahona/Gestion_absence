@@ -28,3 +28,8 @@ export class createAbsenceDto {
 export class createAbsenceReturnDto {
   returnDate?: Date;
 }
+
+export interface ClassLevelDto {
+  id?: number;
+  name?: string;
+}

@@ -1,6 +1,6 @@
 import axios, { AxiosInstance } from "axios";
 import { StudentClient } from "../student.client.js";
-import { StudentDto } from "../../types/dto.js";
+import { ClassLevelDto, StudentDto } from "../../types/dto.js";
 
 const SCHOOL_STUDENTS_URL = process.env.SCHOOL_STUDENTS_URL;
 
@@ -27,6 +27,11 @@ export class StudentClientImpl implements StudentClient {
 
   public async findById(id: number): Promise<StudentDto> {
     const result = await this.http.get(`/students/${id}`);
+    return result.data;
+  }
+
+  public async findAllClassLevels(): Promise<ClassLevelDto[]> {
+    const result = await this.http.get("/class-levels");
     return result.data;
   }
 }
