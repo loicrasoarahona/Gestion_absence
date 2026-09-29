@@ -18,7 +18,7 @@ export class StudentClientImpl implements StudentClient {
     let url = "/students?";
     for (const key in filter) {
       if ((filter as any)[key] != undefined) {
-        url += `${key}=${(filter as any)[key]}`;
+        url += `&${key}=${(filter as any)[key]}`;
       }
     }
     const result = await this.http.get(url);
