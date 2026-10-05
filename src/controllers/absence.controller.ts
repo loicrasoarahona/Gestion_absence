@@ -98,6 +98,9 @@ export class AbsenceController {
       "string",
     ).toString();
     const id = parseInt(req.params.id.toString());
+    const parentId = req.query.parentId
+      ? Number(req.query.parentId)
+      : undefined;
     if (alertType !== "email" && alertType !== "phone") {
       res.status(400).json({ message: "alertType inconnu" });
       return;
@@ -108,6 +111,7 @@ export class AbsenceController {
         await serviceLocatorCore.absenceService.getAlertMessageModel(
           id,
           alertType,
+          parentId,
         );
       res.json({ message });
     } catch (error) {
@@ -146,15 +150,22 @@ export class AbsenceController {
 
   public static async sendAlert(req: Request, res: Response) {
     const alertType = retrieveQueryParameter(req, "alertType", "string");
-    const id = req.params.id.toString();
+    const id = parseInt(req.params.id.toString());
+    const parentId = req.query.parentId
+      ? Number(req.query.parentId)
+      : undefined;
     if (alertType == "email") {
-      const alertSent =
-        await serviceLocatorCore.absenceService.sendAlertByEmail(parseInt(id));
+      const alertSent = await serviceLocatorCore.absenceService.sendAlertByEmail(
+        id,
+        parentId,
+      );
       return res.status(201).json(alertSent);
     }
     if (alertType == "phone") {
-      const alertSent =
-        await serviceLocatorCore.absenceService.sendAlertByPhone(parseInt(id));
+      const alertSent = await serviceLocatorCore.absenceService.sendAlertByPhone(
+        id,
+        parentId,
+      );
       return res.status(201).json(alertSent);
     } else {
       throw "alert type not found";
