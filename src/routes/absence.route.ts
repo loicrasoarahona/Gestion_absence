@@ -9,6 +9,10 @@ router.post("/", AbsenceController.createAbsence);
 
 router.post("/:id/send-alert", AbsenceController.sendAlert);
 
+router.get("/:id/message-model", AbsenceController.getMessageModel);
+
+router.get("/:id/last-alert-sent", AbsenceController.getLastAlertSent);
+
 router.post("/:id/return", AbsenceController.createAbsenceReturn);
 
 export default router;

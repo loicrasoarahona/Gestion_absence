@@ -13,6 +13,50 @@ import { AbsenceService } from "../absence.service.js";
 const SCHOOL_PHONE_NUMBER = process.env.SCHOOL_PHONE_NUMBER;
 
 export class AbsenceServiceImpl implements AbsenceService {
+  private async buildEmailContent(absenceId: number): Promise<string> {
+    const absence = await AbsenceRepository.findById(absenceId);
+    if (!absence)
+      throw new EntityNotFoundError(`Absence ${absenceId} not found`);
+    const studentId = absence.studentId;
+    const student: StudentDto =
+      await serviceLocatorCore.studentClient.findById(studentId);
+    const parentName = student.parents?.[0].name ?? "";
+    const formattedDate = new Date(absence.absenceDate).toLocaleDateString(
+      "fr-FR",
+      { weekday: "long", year: "numeric", month: "long", day: "numeric" },
+    );
+    return `
+      <p>Bonjour ${parentName},</p>
+      <p>
+        Nous vous informons que votre enfant
+        <strong>${absence.studentName} ${absence.studentSurname}</strong>
+        (classe ${absence.studentClass}) a été signalé(e) absent(e) le
+        <strong>${formattedDate}</strong>.
+      </p>
+      <p>Merci de bien vouloir justifier cette absence auprès de l'établissement.</p>
+      <p>Pour toute question, contactez-nous au ${SCHOOL_PHONE_NUMBER}.</p>
+    `;
+  }
+
+  private async buildPhoneContent(absenceId: number): Promise<string> {
+    const absence = await AbsenceRepository.findById(absenceId);
+    if (!absence)
+      throw new EntityNotFoundError(`Absence ${absenceId} not found`);
+    const formattedDate = new Date(absence.absenceDate).toLocaleDateString(
+      "fr-FR",
+      { weekday: "long", year: "numeric", month: "long", day: "numeric" },
+    );
+    return `Au P'tit Pré: ${absence.studentName} ${absence.studentSurname} (classe ${absence.studentClass}) a ete signale(e) absent(e) le ${formattedDate}. Merci de justifier cette absence. Contact: ${SCHOOL_PHONE_NUMBER}`;
+  }
+
+  public async getAlertMessageModel(
+    absenceId: number,
+    alertType: "email" | "phone",
+  ): Promise<string> {
+    if (alertType === "email") return this.buildEmailContent(absenceId);
+    return this.buildPhoneContent(absenceId);
+  }
+
   public async sendAlertByEmail(
     absenceId: number,
   ): Promise<AlertSentAttributes> {
@@ -25,22 +69,7 @@ export class AbsenceServiceImpl implements AbsenceService {
     const email = student.parents?.[0].email;
     if (!email) throw "undefined parent email";
     const subject = "Alerte d'absence";
-    const parentName = student.parents?.[0].name ?? "";
-    const formattedDate = new Date(absence.absenceDate).toLocaleDateString(
-      "fr-FR",
-      { weekday: "long", year: "numeric", month: "long", day: "numeric" },
-    );
-    const contentHtml = `
-      <p>Bonjour ${parentName},</p>
-      <p>
-        Nous vous informons que votre enfant
-        <strong>${absence.studentName} ${absence.studentSurname}</strong>
-        (classe ${absence.studentClass}) a été signalé(e) absent(e) le
-        <strong>${formattedDate}</strong>.
-      </p>
-      <p>Merci de bien vouloir justifier cette absence auprès de l'établissement.</p>
-      <p>Pour toute question, contactez-nous au ${SCHOOL_PHONE_NUMBER}.</p>
-    `;
+    const contentHtml = await this.buildEmailContent(absenceId);
     const alertSentType = await AlertSentType.findOne({
       where: { name: "email" },
     });
@@ -87,11 +116,7 @@ export class AbsenceServiceImpl implements AbsenceService {
       await serviceLocatorCore.studentClient.findById(studentId);
     const phone = student.parents?.[0].phone;
     if (!phone) throw "undefined parent phone";
-    const formattedDate = new Date(absence.absenceDate).toLocaleDateString(
-      "fr-FR",
-      { weekday: "long", year: "numeric", month: "long", day: "numeric" },
-    );
-    const content = `Au P'tit Pré: ${absence.studentName} ${absence.studentSurname} (classe ${absence.studentClass}) a ete signale(e) absent(e) le ${formattedDate}. Merci de justifier cette absence. Contact: ${SCHOOL_PHONE_NUMBER}`;
+    const content = await this.buildPhoneContent(absenceId);
 
     const alertSentType = await AlertSentType.findOne({
       where: { name: "phone" },

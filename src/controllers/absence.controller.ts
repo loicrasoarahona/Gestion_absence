@@ -91,6 +91,59 @@ export class AbsenceController {
     }
   }
 
+  public static async getMessageModel(req: Request, res: Response) {
+    const alertType = retrieveQueryParameter(
+      req,
+      "alertType",
+      "string",
+    ).toString();
+    const id = parseInt(req.params.id.toString());
+    if (alertType !== "email" && alertType !== "phone") {
+      res.status(400).json({ message: "alertType inconnu" });
+      return;
+    }
+
+    try {
+      const message =
+        await serviceLocatorCore.absenceService.getAlertMessageModel(
+          id,
+          alertType,
+        );
+      res.json({ message });
+    } catch (error) {
+      console.error(error);
+      res
+        .status(500)
+        .json({ message: "Impossible de générer le modèle de message" });
+    }
+  }
+
+  public static async getLastAlertSent(req: Request, res: Response) {
+    const alertType = retrieveQueryParameter(
+      req,
+      "alertType",
+      "string",
+    ).toString();
+    const id = parseInt(req.params.id.toString());
+    if (alertType !== "email" && alertType !== "phone") {
+      res.status(400).json({ message: "alertType inconnu" });
+      return;
+    }
+
+    try {
+      const alertSent = await AbsenceRepository.findLastAlertSent(
+        id,
+        alertType,
+      );
+      res.json(alertSent);
+    } catch (error) {
+      console.error(error);
+      res
+        .status(500)
+        .json({ message: "Impossible de récupérer la dernière alerte" });
+    }
+  }
+
   public static async sendAlert(req: Request, res: Response) {
     const alertType = retrieveQueryParameter(req, "alertType", "string");
     const id = req.params.id.toString();
