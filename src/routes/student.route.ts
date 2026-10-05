@@ -1,22 +1,11 @@
 import express from "express";
 import serviceLocator from "../core/service-locator.core.js";
+import { StudentController } from "../controllers/student.controller.js";
 
 const router = express.Router();
 
-router.get("/", async (req, res) => {
-  const { class_level, name } = req.query;
+router.get("/", StudentController.findAll);
 
-  try {
-    const students = await serviceLocator.studentClient.findAllUsers({
-      class_level: class_level ? Number(class_level) : undefined,
-      name: name ? String(name) : undefined,
-    });
-
-    res.json(students);
-  } catch (error) {
-    console.error(error);
-    res.status(502).json({ message: "Impossible de récupérer les élèves" });
-  }
-});
+router.get("/:id/parents", StudentController.findParents);
 
 export default router;
