@@ -6,6 +6,7 @@ import { setupRelations } from "./models/setupRelations.js";
 import StudentRoute from "./routes/student.route.js";
 import AbsenceRoute from "./routes/absence.route.js";
 import ClassLevelRoute from "./routes/class-level.route.js";
+import AbsenceReasonStdRoute from "./routes/absence-reason-std.route.js";
 import { UndefinedQueryParameterError } from "./util/request-param.util.js";
 import { EntityNotFoundError } from "./error/entity-not-found.error.js";
 
@@ -33,6 +34,7 @@ async function main() {
     app.use("/students", StudentRoute);
     app.use("/absences", AbsenceRoute);
     app.use("/class-levels", ClassLevelRoute);
+    app.use("/absence-reason-stds", AbsenceReasonStdRoute);
 
     // gestion d'erreurs http
     app.use((err: unknown, req: Request, res: Response, next: NextFunction) => {

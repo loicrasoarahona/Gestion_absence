@@ -1,7 +1,12 @@
 import { literal, Op } from "sequelize";
 import { Absence } from "../models/absence.model.js";
 import { AlertSent } from "../models/alertSent.model.js";
-import { AbsenceAttributes, AlertSentAttributes } from "../types/interfaces.js";
+import { AbsenceReasonStd } from "../models/absenceReasonStd.model.js";
+import {
+  AbsenceAttributes,
+  AbsenceReasonStdAttributes,
+  AlertSentAttributes,
+} from "../types/interfaces.js";
 import { AlertSentType } from "../models/alertSentType.model.js";
 
 export class AbsenceRepository {
@@ -48,5 +53,14 @@ export class AbsenceRepository {
     });
     if (!result) return null;
     return result.dataValues;
+  }
+
+  public static async findAllReasonsStd(): Promise<
+    AbsenceReasonStdAttributes[]
+  > {
+    const results = await AbsenceReasonStd.findAll({
+      order: [["name", "ASC"]],
+    });
+    return results.map((result) => result.dataValues);
   }
 }

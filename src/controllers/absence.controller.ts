@@ -19,6 +19,18 @@ export class AbsenceController {
     }
   }
 
+  public static async listReasonsStd(req: Request, res: Response) {
+    try {
+      const reasons = await AbsenceRepository.findAllReasonsStd();
+      res.json(reasons);
+    } catch (error) {
+      console.error(error);
+      res
+        .status(500)
+        .json({ message: "Impossible de récupérer les motifs d'absence" });
+    }
+  }
+
   public static async createAbsence(req: Request, res: Response) {
     const {
       absenceDate,
