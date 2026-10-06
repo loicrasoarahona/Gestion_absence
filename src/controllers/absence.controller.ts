@@ -67,7 +67,8 @@ export class AbsenceController {
 
   public static async createAbsenceReturn(req: Request, res: Response) {
     const id = parseInt(req.params.id.toString());
-    const { returnDate } = req.body as createAbsenceReturnDto;
+    const { returnDate, reasonStdId, reasonDetail } =
+      req.body as createAbsenceReturnDto;
 
     try {
       const absence = await AbsenceRepository.findById(id);
@@ -90,7 +91,11 @@ export class AbsenceController {
       });
 
       await Absence.update(
-        { absenceReturnId: absenceReturn.dataValues.id },
+        {
+          absenceReturnId: absenceReturn.dataValues.id,
+          ...(reasonStdId !== undefined && { reasonStdId }),
+          ...(reasonDetail !== undefined && { reasonDetail }),
+        },
         { where: { id } },
       );
 

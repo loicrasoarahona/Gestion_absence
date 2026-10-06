@@ -27,6 +27,8 @@ export class createAbsenceDto {
 
 export class createAbsenceReturnDto {
   returnDate?: Date;
+  reasonStdId?: number;
+  reasonDetail?: string;
 }
 
 export interface ClassLevelDto {
