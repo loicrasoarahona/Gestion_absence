@@ -2,6 +2,7 @@ import { literal, Op } from "sequelize";
 import { Absence } from "../models/absence.model.js";
 import { AlertSent } from "../models/alertSent.model.js";
 import { AbsenceReasonStd } from "../models/absenceReasonStd.model.js";
+import { AbsenceReturn } from "../models/absenceReturn.model.js";
 import {
   AbsenceAttributes,
   AbsenceReasonStdAttributes,
@@ -60,6 +61,30 @@ export class AbsenceRepository {
   > {
     const results = await AbsenceReasonStd.findAll({
       order: [["name", "ASC"]],
+    });
+    return results.map((result) => result.dataValues);
+  }
+
+  public static async findByStudentAndPeriod(
+    studentId: number,
+    from: Date,
+    to: Date,
+  ): Promise<AbsenceAttributes[]> {
+    const results = await Absence.findAll({
+      where: {
+        studentId,
+        absenceDate: { [Op.gte]: from, [Op.lte]: to },
+      },
+      include: [
+        { model: AbsenceReturn, as: "return" },
+        { model: AbsenceReasonStd, as: "reasonStd" },
+        {
+          model: AlertSent,
+          as: "alerts",
+          include: [{ model: AlertSentType, as: "alertSentType" }],
+        },
+      ],
+      order: [["absenceDate", "DESC"]],
     });
     return results.map((result) => result.dataValues);
   }

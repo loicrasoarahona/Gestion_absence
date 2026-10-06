@@ -10,4 +10,6 @@ router.get("/paginated", StudentController.findAllPaginated);
 
 router.get("/:id/parents", StudentController.findParents);
 
+router.get("/:id/attendance-report", StudentController.getAttendanceReport);
+
 export default router;

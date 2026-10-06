@@ -1,5 +1,7 @@
 import { Request, Response } from "express";
 import serviceLocatorCore from "../core/service-locator.core.js";
+import { AbsenceRepository } from "../repositories/absence.repository.js";
+import { retrieveQueryParameter } from "../util/request-param.util.js";
 
 export class StudentController {
   public static async findAll(req: Request, res: Response) {
@@ -43,5 +45,57 @@ export class StudentController {
       parseInt(id),
     );
     res.json(retour);
+  }
+
+  public static async getAttendanceReport(req: Request, res: Response) {
+    const studentId = parseInt(req.params.id.toString());
+    const from = new Date(
+      retrieveQueryParameter(req, "from", "string").toString(),
+    );
+    const to = new Date(
+      retrieveQueryParameter(req, "to", "string").toString(),
+    );
+
+    try {
+      const student =
+        await serviceLocatorCore.studentClient.findById(studentId);
+      const absences = await AbsenceRepository.findByStudentAndPeriod(
+        studentId,
+        from,
+        to,
+      );
+
+      const totalAbsences = absences.length;
+      const justifiedCount = absences.filter(
+        (absence) => absence.return != null,
+      ).length;
+      const unjustifiedCount = totalAbsences - justifiedCount;
+
+      res.json({
+        student: {
+          id: studentId,
+          name: student.name,
+          surname: student.surname,
+        },
+        period: { from, to },
+        totalAbsences,
+        justifiedCount,
+        unjustifiedCount,
+        absences: absences.map((absence) => ({
+          id: absence.id,
+          absenceDate: absence.absenceDate,
+          reasonStd: absence.reasonStd ?? null,
+          reasonDetail: absence.reasonDetail ?? null,
+          justified: absence.return != null,
+          returnDate: absence.return?.returnDate ?? null,
+          alerts: absence.alerts ?? [],
+        })),
+      });
+    } catch (error) {
+      console.error(error);
+      res
+        .status(500)
+        .json({ message: "Impossible de générer le bulletin d'assiduité" });
+    }
   }
 }
