@@ -1,6 +1,11 @@
 import axios, { AxiosInstance } from "axios";
 import { StudentClient } from "../student.client.js";
-import { ClassLevelDto, ParentDto, StudentDto } from "../../types/dto.js";
+import {
+  ClassLevelDto,
+  ParentDto,
+  PaginatedResultDto,
+  StudentDto,
+} from "../../types/dto.js";
 
 const SCHOOL_STUDENTS_URL = process.env.SCHOOL_STUDENTS_URL;
 
@@ -16,6 +21,22 @@ export class StudentClientImpl implements StudentClient {
     name?: string;
   }): Promise<StudentDto[]> {
     let url = "/students?";
+    for (const key in filter) {
+      if ((filter as any)[key] != undefined) {
+        url += `&${key}=${(filter as any)[key]}`;
+      }
+    }
+    const result = await this.http.get(url);
+    return result.data;
+  }
+
+  public async findAllUsersPaginated(filter: {
+    class_level?: number;
+    name?: string;
+    page?: number;
+    limit?: number;
+  }): Promise<PaginatedResultDto<StudentDto>> {
+    let url = "/students/paginated?";
     for (const key in filter) {
       if ((filter as any)[key] != undefined) {
         url += `&${key}=${(filter as any)[key]}`;

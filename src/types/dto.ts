@@ -35,3 +35,8 @@ export interface ClassLevelDto {
   id?: number;
   name?: string;
 }
+
+export interface PaginatedResultDto<T> {
+  members: T[];
+  totalItems: number;
+}

@@ -6,6 +6,8 @@ const router = express.Router();
 
 router.get("/", StudentController.findAll);
 
+router.get("/paginated", StudentController.findAllPaginated);
+
 router.get("/:id/parents", StudentController.findParents);
 
 export default router;
