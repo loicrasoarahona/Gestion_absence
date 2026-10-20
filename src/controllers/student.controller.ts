@@ -8,10 +8,13 @@ export class StudentController {
     const { class_level, name } = req.query;
 
     try {
-      const students = await serviceLocatorCore.studentClient.findAllUsers({
-        class_level: class_level ? Number(class_level) : undefined,
-        name: name ? String(name) : undefined,
-      });
+      const students = await serviceLocatorCore.studentClient.findAllUsers(
+        {
+          class_level: class_level ? Number(class_level) : undefined,
+          name: name ? String(name) : undefined,
+        },
+        req,
+      );
 
       res.json(students);
     } catch (error) {
@@ -24,12 +27,16 @@ export class StudentController {
     const { class_level, name, page, limit } = req.query;
 
     try {
-      const students = await serviceLocatorCore.studentClient.findAllUsersPaginated({
-        class_level: class_level ? Number(class_level) : undefined,
-        name: name ? String(name) : undefined,
-        page: page ? Number(page) : undefined,
-        limit: limit ? Number(limit) : undefined,
-      });
+      const students =
+        await serviceLocatorCore.studentClient.findAllUsersPaginated(
+          {
+            class_level: class_level ? Number(class_level) : undefined,
+            name: name ? String(name) : undefined,
+            page: page ? Number(page) : undefined,
+            limit: limit ? Number(limit) : undefined,
+          },
+          req,
+        );
 
       res.json(students);
     } catch (error) {
@@ -43,6 +50,7 @@ export class StudentController {
     if (typeof id != "string") throw "invalid format of id";
     const retour = await serviceLocatorCore.studentClient.findParents(
       parseInt(id),
+      req,
     );
     res.json(retour);
   }
@@ -52,13 +60,13 @@ export class StudentController {
     const from = new Date(
       retrieveQueryParameter(req, "from", "string").toString(),
     );
-    const to = new Date(
-      retrieveQueryParameter(req, "to", "string").toString(),
-    );
+    const to = new Date(retrieveQueryParameter(req, "to", "string").toString());
 
     try {
-      const student =
-        await serviceLocatorCore.studentClient.findById(studentId);
+      const student = await serviceLocatorCore.studentClient.findById(
+        studentId,
+        req,
+      );
       const absences = await AbsenceRepository.findByStudentAndPeriod(
         studentId,
         from,

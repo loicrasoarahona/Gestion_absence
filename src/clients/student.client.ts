@@ -1,3 +1,4 @@
+import { Request } from "express";
 import {
   ClassLevelDto,
   ParentDto,
@@ -6,21 +7,27 @@ import {
 } from "../types/dto.js";
 
 export interface StudentClient {
-  findAllUsers(filter: {
-    class_level?: number;
-    name?: string;
-  }): Promise<StudentDto[]>;
+  findAllUsers(
+    filter: {
+      class_level?: number;
+      name?: string;
+    },
+    request: Request,
+  ): Promise<StudentDto[]>;
 
-  findAllUsersPaginated(filter: {
-    class_level?: number;
-    name?: string;
-    page?: number;
-    limit?: number;
-  }): Promise<PaginatedResultDto<StudentDto>>;
+  findAllUsersPaginated(
+    filter: {
+      class_level?: number;
+      name?: string;
+      page?: number;
+      limit?: number;
+    },
+    request: Request,
+  ): Promise<PaginatedResultDto<StudentDto>>;
 
-  findById(id: number): Promise<StudentDto>;
+  findById(id: number, request: Request): Promise<StudentDto>;
 
-  findAllClassLevels(): Promise<ClassLevelDto[]>;
+  findAllClassLevels(request: Request): Promise<ClassLevelDto[]>;
 
-  findParents(id: number): Promise<ParentDto[]>;
+  findParents(id: number, request: Request): Promise<ParentDto[]>;
 }
