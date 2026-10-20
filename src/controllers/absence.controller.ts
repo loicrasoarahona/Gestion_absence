@@ -128,6 +128,7 @@ export class AbsenceController {
         await serviceLocatorCore.absenceService.getAlertMessageModel(
           id,
           alertType,
+          req,
           parentId,
         );
       res.json({ message });
@@ -174,6 +175,7 @@ export class AbsenceController {
     if (alertType == "email") {
       const alertSent = await serviceLocatorCore.absenceService.sendAlertByEmail(
         id,
+        req,
         parentId,
       );
       return res.status(201).json(alertSent);
@@ -181,6 +183,7 @@ export class AbsenceController {
     if (alertType == "phone") {
       const alertSent = await serviceLocatorCore.absenceService.sendAlertByPhone(
         id,
+        req,
         parentId,
       );
       return res.status(201).json(alertSent);

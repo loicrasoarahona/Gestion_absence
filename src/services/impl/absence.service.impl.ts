@@ -1,3 +1,4 @@
+import { Request } from "express";
 import serviceLocatorCore from "../../core/service-locator.core.js";
 import { EntityNotFoundError } from "../../error/entity-not-found.error.js";
 import { AlertSent } from "../../models/alertSent.model.js";
@@ -28,6 +29,7 @@ export class AbsenceServiceImpl implements AbsenceService {
 
   private async buildEmailContent(
     absenceId: number,
+    request: Request,
     parentId?: number,
   ): Promise<string> {
     const absence = await AbsenceRepository.findById(absenceId);
@@ -35,7 +37,7 @@ export class AbsenceServiceImpl implements AbsenceService {
       throw new EntityNotFoundError(`Absence ${absenceId} not found`);
     const studentId = absence.studentId;
     const student: StudentDto =
-      await serviceLocatorCore.studentClient.findById(studentId);
+      await serviceLocatorCore.studentClient.findById(studentId, request);
     const parentName = this.selectParent(student, parentId)?.name ?? "";
     const formattedDate = new Date(absence.absenceDate).toLocaleDateString(
       "fr-FR",
@@ -68,15 +70,17 @@ export class AbsenceServiceImpl implements AbsenceService {
   public async getAlertMessageModel(
     absenceId: number,
     alertType: "email" | "phone",
+    request: Request,
     parentId?: number,
   ): Promise<string> {
     if (alertType === "email")
-      return this.buildEmailContent(absenceId, parentId);
+      return this.buildEmailContent(absenceId, request, parentId);
     return this.buildPhoneContent(absenceId);
   }
 
   public async sendAlertByEmail(
     absenceId: number,
+    request: Request,
     parentId?: number,
   ): Promise<AlertSentAttributes> {
     const absence = await AbsenceRepository.findById(absenceId);
@@ -84,11 +88,15 @@ export class AbsenceServiceImpl implements AbsenceService {
       throw new EntityNotFoundError(`Absence ${absenceId} not found`);
     const studentId = absence.studentId;
     const student: StudentDto =
-      await serviceLocatorCore.studentClient.findById(studentId);
+      await serviceLocatorCore.studentClient.findById(studentId, request);
     const email = this.selectParent(student, parentId)?.email;
     if (!email) throw "undefined parent email";
     const subject = "Alerte d'absence";
-    const contentHtml = await this.buildEmailContent(absenceId, parentId);
+    const contentHtml = await this.buildEmailContent(
+      absenceId,
+      request,
+      parentId,
+    );
     const alertSentType = await AlertSentType.findOne({
       where: { name: "email" },
     });
@@ -126,6 +134,7 @@ export class AbsenceServiceImpl implements AbsenceService {
 
   public async sendAlertByPhone(
     absenceId: number,
+    request: Request,
     parentId?: number,
   ): Promise<AlertSentAttributes> {
     const absence = await AbsenceRepository.findById(absenceId);
@@ -133,7 +142,7 @@ export class AbsenceServiceImpl implements AbsenceService {
       throw new EntityNotFoundError(`Absence ${absenceId} not found`);
     const studentId = absence.studentId;
     const student: StudentDto =
-      await serviceLocatorCore.studentClient.findById(studentId);
+      await serviceLocatorCore.studentClient.findById(studentId, request);
     const phone = this.selectParent(student, parentId)?.phone;
     if (!phone) throw "undefined parent phone";
     const content = await this.buildPhoneContent(absenceId);
